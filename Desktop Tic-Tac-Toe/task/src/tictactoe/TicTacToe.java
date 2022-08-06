@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 
 class TButton extends JButton {
@@ -84,8 +85,6 @@ class Board extends JPanel {
 
         // set buttons text to " "
         Global.clearButtons();
-        Global.setEnabledButtons(false);
-        Global.nextStep = 'X';
 
     }
 }
@@ -99,30 +98,89 @@ class ListenerAction implements ActionListener {
             Global.setState(State.IN_PROGRESS);
             if (Global.nextStep == 'X') {
                 Global.nextStep = 'O';
+                if ("Human".equals(Global.player2.getText())) {
+                    Global.setState(State.IN_PROGRESS, "The turn of Human Player (O)");
+                } else {
+                    Global.setState(State.IN_PROGRESS, "The turn of Robot Player (O)");
+                }
             } else {
                 Global.nextStep = 'X';
+                if ("Human".equals(Global.player1.getText())) {
+                    Global.setState(State.IN_PROGRESS, "The turn of Human Player (X)");
+                } else {
+                    Global.setState(State.IN_PROGRESS, "The turn of Robot Player (X)");
+                }
             }
 
             if (Global.isWin("X")) {
-                Global.setState(State.X_WINS);
+                Global.setState(State.X_WINS, "The Human Player (X) wins");
             } else if (Global.isWin("O")) {
-                Global.setState(State.O_WINS);
+                Global.setState(State.X_WINS, "The Human Player (O) wins");
             } else if (Global.isDraw()) {
                 Global.setState(State.DRAW);
+            } else if ("Robot".equals(Global.player1.getText()) || "Robot".equals(Global.player2.getText())) {
+                Global.doStep();
+                if (Global.isWin("X")) {
+                    Global.setState(State.X_WINS, "The Robot Player (X) wins");
+                } else if (Global.isWin("O")) {
+                    Global.setState(State.O_WINS, "The Robot Player (O) wins");
+                } else if (Global.isDraw()) {
+                    Global.setState(State.DRAW);
+                } else if (Global.nextStep == 'X') {
+                    Global.setState(State.IN_PROGRESS, "The turn of Human Player (X)");
+                } else {
+                    Global.setState(State.IN_PROGRESS, "The turn of Human Player (O)");
+                }
             }
         }
-
     }
 }
 
 class ActionListenerStart implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-        Global.clearButtons();
-        Global.setState(State.NOT_STARTED);
-        Global.nextStep = 'X';
-        Global.startReset.setText("Reset");
-        Global.player1.setEnabled(false);
-        Global.player2.setEnabled(false);
+        JButton btn = (JButton) e.getSource();
+        if ("Start".equals(btn.getText())) {
+            Global.player1.setEnabled(false);
+            Global.player2.setEnabled(false);
+            //Global.setState(State.IN_PROGRESS);
+            if ("Human".equals(Global.player1.getText())) {
+                Global.setState(State.IN_PROGRESS, "The turn of Human Player (X)");
+            } else {
+                Global.setState(State.IN_PROGRESS, "The turn of Robot Player (X)");
+            }
+            btn.setText("Reset");
+
+            if ("Robot".equals(Global.player1.getText()) && "Robot".equals(Global.player2.getText())) {
+                boolean exit = false;
+                do {
+
+                    Global.doStep();
+                    if (Global.isWin("X")) {
+                        Global.setState(State.X_WINS, "The Robot Player (X) wins");
+                        exit = true;
+                    } else if (Global.isWin("O")) {
+                        Global.setState(State.O_WINS, "The Robot Player (O) wins");
+                        exit = true;
+                    } else if (Global.isDraw()) {
+                        Global.setState(State.DRAW);
+                        exit = true;
+                    }
+
+                } while(!exit);
+            } else if ("Robot".equals(Global.player1.getText())) {
+                Global.doStep();
+                Global.setState(State.IN_PROGRESS, "The turn of Human Player (O)");
+            }
+
+        } else {
+            Global.clearButtons();
+            Global.player1.setEnabled(true);
+            Global.player2.setEnabled(true);
+            Global.setState(State.NOT_STARTED);
+            Global.nextStep = 'X';
+            btn.setText("Start");
+        }
+
     }
 }
 
@@ -137,12 +195,46 @@ class ActionListenerPlayer implements ActionListener {
     }
 }
 
+class ActionListenerMenu implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
+        JMenuItem jmi = (JMenuItem) e.getSource();
+        switch (jmi.getName()) {
+            case "MenuHumanHuman":
+                Global.player1.setText("Human");
+                Global.player2.setText("Human");
+                break;
+            case "MenuHumanRobot":
+                Global.player1.setText("Human");
+                Global.player2.setText("Robot");
+                break;
+            case "MenuRobotHuman":
+                Global.player1.setText("Robot");
+                Global.player2.setText("Human");
+                break;
+            case "MenuRobotRobot":
+                Global.player1.setText("Robot");
+                Global.player2.setText("Robot");
+                break;
+            default:
+        }
+
+        Global.clearButtons();
+        Global.player1.setEnabled(true);
+        Global.player2.setEnabled(true);
+        Global.setState(State.NOT_STARTED);
+        Global.nextStep = 'X';
+        Global.startReset.setText("Start");
+        Global.startReset.doClick();
+
+    }
+}
+
 public class TicTacToe extends JFrame {
 
     public TicTacToe() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Tic Tac Toe");
-        setSize(300, 345);
+        setSize(300, 365);
         setResizable(false);
 
         JPanel toolbar = new JPanel();
@@ -192,18 +284,54 @@ public class TicTacToe extends JFrame {
         panel.add(label);
         Global.label = label;
 
-//        JButton reset = new JButton("Reset");
-//        reset.setName("ButtonReset");
-//        reset.setBounds(190, 0, 80, 30);
-//        panel.add(reset);
-
-//        ActionListenerReset actionListenerReset = new ActionListenerReset();
-//        reset.addActionListener(actionListenerReset);
-
         add(panel);
 
         setLayout(null);
         setLocationRelativeTo(null);
+
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu gameMenu = new JMenu("Game");
+        gameMenu.setName("MenuGame");
+        gameMenu.setMnemonic(KeyEvent.VK_G);
+
+        JMenuItem humanVsHuman = new JMenuItem("Human vs Human");
+        humanVsHuman.setName("MenuHumanHuman");
+        humanVsHuman.setMnemonic(KeyEvent.VK_H);
+        JMenuItem humanVsRobot = new JMenuItem("Human vs Robot");
+        humanVsRobot.setName("MenuHumanRobot");
+        humanVsRobot.setMnemonic(KeyEvent.VK_R);
+        JMenuItem robotVsHuman = new JMenuItem("Robot vs Human");
+        robotVsHuman.setName("MenuRobotHuman");
+        robotVsHuman.setMnemonic(KeyEvent.VK_U);
+        JMenuItem robotVsRobot = new JMenuItem("Robot vs Robot");
+        robotVsRobot.setName("MenuRobotRobot");
+        robotVsRobot.setMnemonic(KeyEvent.VK_O);
+        JMenuItem exitMenuItem = new JMenuItem("Exit");
+        exitMenuItem.setName("MenuExit");
+        exitMenuItem.setMnemonic(KeyEvent.VK_X);
+        exitMenuItem.addActionListener(event -> System.exit(0));
+
+        ActionListenerMenu actionListenerMenu = new ActionListenerMenu();
+        humanVsHuman.addActionListener(actionListenerMenu);
+        humanVsRobot.addActionListener(actionListenerMenu);
+        robotVsHuman.addActionListener(actionListenerMenu);
+        robotVsRobot.addActionListener(actionListenerMenu);
+
+        gameMenu.add(humanVsHuman);
+        gameMenu.add(humanVsRobot);
+        gameMenu.add(robotVsHuman);
+        gameMenu.add(robotVsRobot);
+
+        gameMenu.addSeparator();
+        gameMenu.add(exitMenuItem);
+
+        menuBar.add(gameMenu);
+        setJMenuBar(menuBar);
+
+        Global.setState(State.NOT_STARTED);
+        Global.nextStep = 'X';
+
         setVisible(true);
     }
 

@@ -158,7 +158,7 @@ files:
 - name: src/tictactoe/TButton.java
   visible: true
   learner_created: true
-feedback_link: https://hyperskill.org/projects/174/stages/897/implement#comment
+feedback_link: https://hyperskill.org/learn/step/12894#comment
 status: Solved
 feedback:
   message: Congratulations!

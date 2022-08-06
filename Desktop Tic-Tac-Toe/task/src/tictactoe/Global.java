@@ -50,6 +50,21 @@ public class Global {
     public static void setState(State state) {
         Global.state = state;
         Global.label.setText(state.text);
+        if (state == State.IN_PROGRESS) {
+            Global.setEnabledButtons(true);
+        } else {
+            Global.setEnabledButtons(false);
+        }
+    }
+
+    public static void setState(State state, String text) {
+        Global.state = state;
+        Global.label.setText(text);
+        if (state == State.IN_PROGRESS) {
+            Global.setEnabledButtons(true);
+        } else {
+            Global.setEnabledButtons(false);
+        }
     }
 
     public static State getState() {
@@ -72,6 +87,36 @@ public class Global {
         return !buttonA3.getText().equals(val) && !buttonB3.getText().equals(val) && !buttonC3.getText().equals(val)
                 && !buttonA2.getText().equals(val) && !buttonB2.getText().equals(val) && !buttonC2.getText().equals(val)
                 && !buttonA1.getText().equals(val) && !buttonB1.getText().equals(val) && !buttonC1.getText().equals(val);
+    }
+
+    public static void doStep() {
+
+        String val = " ";
+        if (buttonA3.getText().equals(val)) {
+            buttonA3.setText(Character.toString(nextStep));
+        } else if (buttonB3.getText().equals(val)) {
+            buttonB3.setText(Character.toString(nextStep));
+        } else if (buttonC3.getText().equals(val)) {
+            buttonC3.setText(Character.toString(nextStep));
+        } else if (buttonA2.getText().equals(val)) {
+            buttonA2.setText(Character.toString(nextStep));
+        } else if (buttonB2.getText().equals(val)) {
+            buttonB2.setText(Character.toString(nextStep));
+        } else if (buttonC2.getText().equals(val)) {
+            buttonC2.setText(Character.toString(nextStep));
+        } else if (buttonA1.getText().equals(val)) {
+            buttonA1.setText(Character.toString(nextStep));
+        } else if (buttonB1.getText().equals(val)) {
+            buttonB1.setText(Character.toString(nextStep));
+        } else if (buttonC1.getText().equals(val)) {
+            buttonC1.setText(Character.toString(nextStep));
+        }
+
+        if (nextStep == 'X') {
+            nextStep = 'O';
+        } else {
+            nextStep = 'X';
+        }
     }
 
 }
